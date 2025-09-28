@@ -103,9 +103,13 @@ for tbl in candidate_tables:
 
         # Join metadata + enums
         long2 = (long1
-            .join(d_meta, (F.lower("filename")==F.col("dict_file")) & (F.col("col_name")==F.col("name")), "left")
+            # metadata join still uses filename + col_name
+            .join(d_meta,
+                  (F.lower("filename")==F.col("dict_file")) &
+                  (F.col("col_name")==F.col("name")),
+                  "left")
+            # enum join only needs col_name + code
             .join(d_enum.alias("de"),
-                  (F.lower("filename")==F.col("de.dict_file")) &
                   (F.col("col_name")==F.col("de.name")) &
                   (F.col(f"{BENDICT_PREFIX}value_canon")==F.col(f"de.{BENDICT_PREFIX}code_canon")),
                   "left")
@@ -114,7 +118,6 @@ for tbl in candidate_tables:
 
         # Select with dictionary fields first
         final = long2.select(
-            # Dictionary fields first
             safe_col(F.col(f"{BENDICT_PREFIX}title")).alias(f"{BENDICT_PREFIX}title"),
             safe_col(F.col(f"{BENDICT_PREFIX}field_title")).alias(f"{BENDICT_PREFIX}field_title"),
             safe_col(F.col(f"{BENDICT_PREFIX}json_question")).alias(f"{BENDICT_PREFIX}json_question"),
@@ -143,11 +146,11 @@ for tbl in candidate_tables:
         error_message = str(e)[:4000]
         print(f"❌ FAILED ({src_fq}): {error_message}")
 
-    # Audit log entry (aligned with Bronze schema → uses source_file)
+    # Audit log entry
     audit_entries.append(Row(
         timestamp=started_at,
         step="silver_enrich",
-        source_file=src_fq,    # ✅ consistent with Bronze
+        source_file=src_fq,
         output_table=out_tbl,
         action="overwrite",
         status=status,
@@ -159,7 +162,7 @@ for tbl in candidate_tables:
 audit_schema = StructType([
     StructField("timestamp", StringType(), True),
     StructField("step", StringType(), True),
-    StructField("source_file", StringType(), True),   # ✅ matches Bronze schema
+    StructField("source_file", StringType(), True),
     StructField("output_table", StringType(), True),
     StructField("action", StringType(), True),
     StructField("status", StringType(), True),
