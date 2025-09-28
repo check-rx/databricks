@@ -1,8 +1,13 @@
--- Plan metadata (Section A)
+%sql
+-- Gold schema
 CREATE SCHEMA IF NOT EXISTS auto.gold;
 
+-- Plan metadata (Section A)
 CREATE TABLE IF NOT EXISTS auto.gold.plan_master (
-  plan_id STRING,
+  contract_id STRING,
+  plan_number STRING,
+  segment_id STRING,
+  full_bid_id STRING,
   source_table STRING,
   col_name STRING,
   raw_value STRING,
@@ -12,7 +17,10 @@ CREATE TABLE IF NOT EXISTS auto.gold.plan_master (
 
 -- Structured cost sharing (copay, coinsurance, deductible, max_plan, limit)
 CREATE TABLE IF NOT EXISTS auto.gold.plan_costsharing (
-  plan_id STRING,
+  contract_id STRING,
+  plan_number STRING,
+  segment_id STRING,
+  full_bid_id STRING,
   service_category STRING,
   col_name STRING,
   coverage_type STRING,   -- copay | coinsurance | deductible | max_plan | limit | other
@@ -24,7 +32,10 @@ CREATE TABLE IF NOT EXISTS auto.gold.plan_costsharing (
 
 -- Frequency/quantity limits (visit caps, screenings per year, etc.)
 CREATE TABLE IF NOT EXISTS auto.gold.plan_limits (
-  plan_id STRING,
+  contract_id STRING,
+  plan_number STRING,
+  segment_id STRING,
+  full_bid_id STRING,
   service_category STRING,
   col_name STRING,
   limit_type STRING,
@@ -34,7 +45,10 @@ CREATE TABLE IF NOT EXISTS auto.gold.plan_limits (
 
 -- Narrative/unstructured benefits (for RAG embeddings)
 CREATE TABLE IF NOT EXISTS auto.gold.plan_services_long (
-  plan_id STRING,
+  contract_id STRING,
+  plan_number STRING,
+  segment_id STRING,
+  full_bid_id STRING,
   source_table STRING,
   col_name STRING,
   bendict_json_question STRING,
